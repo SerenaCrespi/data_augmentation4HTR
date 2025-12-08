@@ -60,6 +60,28 @@ def _register_default_and_common_ns(root):
     ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
 
 
+def _update_image_filename_in_xml(xml_root, flavour, new_image_path):
+    """
+    Aggiorna il riferimento all'immagine di pagina:
+    - ALTO: elemento <fileName>
+    - PAGE: attributo imageFilename su <Page>
+    """
+    new_name = os.path.basename(new_image_path)
+
+    if flavour == "ALTO":
+        # Cerca <fileName> e aggiorna il testo
+        for el in xml_root.iter():
+            if _localname(el.tag) == "fileName":
+                el.text = new_name
+                break
+    else:  # PAGE
+        # Cerca il nodo <Page> e aggiorna @imageFilename
+        for el in xml_root.iter():
+            if _localname(el.tag) == "Page":
+                el.set("imageFilename", new_name)
+                break
+
+
 # ---------- page-key helpers ----------
 
 _PAGE_KEY_RE = re.compile(r'^(?P<key>.+?)_?line[_\-]?\d+', re.IGNORECASE)
@@ -496,6 +518,10 @@ def rebuild_pages_by_method(base_folder="augmented_output",
                 xml_tree = ET.parse(xml_path)
                 xml_root = xml_tree.getroot()
                 _register_default_and_common_ns(xml_root)
+
+                # *** NUOVO: aggiorna il riferimento all'immagine ***
+                _update_image_filename_in_xml(xml_root, flavour, img_out)
+
                 if flavour == "PAGE":
                     xml_tree = update_page_with_augmented(xml_tree, xml_root, page_key_label)
                 else:
@@ -549,7 +575,6 @@ def rebuild_pages_by_method(base_folder="augmented_output",
         for key, files in buckets.items():
             files.sort()
             _rebuild_for_group(files, key)
-
 
 # Example usage (adjust paths to your setup):
 # if __name__ == "__main__":
