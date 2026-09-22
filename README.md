@@ -214,7 +214,7 @@ file.
 ## Authors
 
 **Serena Carlamaria Crespi**\
-Centre d'Études Supérieures de la Renaissance · Université de Tours\
+ERC PRIMA · Centre d'Études Supérieures de la Renaissance · Université de Tours\
 ORCID: https://orcid.org/0000-0001-6747-3257
 
 **Carlos-Emiliano González-Gallardo**\
