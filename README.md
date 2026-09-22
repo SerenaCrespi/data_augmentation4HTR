@@ -1,88 +1,242 @@
-# 🖋️ Low-Cost Synthetic Data Generation for HTR Training: Evaluating a Multimodal Strategy for Historical Manuscript Processing
+# 🖋️ Low-Cost Synthetic Data Generation for HTR Training
 
-This tool performs **data augmentation on historical document images** (e.g., manuscript scans) and their corresponding **ALTO XML** files. It incorporates both
-a denoising phase and various augmentation techniques to create diverse and realistic training data.
+## Evaluating a Multimodal Strategy for Historical Manuscript Processing
 
+This repository contains the data-augmentation workflow developed within
+the **ERC PRIMA --- Manuscripts in the Age of Print (1575--1800)**
+project for experiments on Handwritten Text Recognition (HTR) of
+premodern Italian manuscripts.
+
+The workflow generates synthetic training data from historical document
+images and their corresponding **ALTO XML** files. It combines image
+preprocessing, line-level transformations, synthetic handwriting
+variation, page reconstruction, and controlled perturbation of layout
+information while preserving the correspondence between images and
+annotations.
+
+The code was developed by **Serena Carlamaria Crespi** and
+**Carlos-Emiliano González-Gallardo**.
+
+------------------------------------------------------------------------
 
 ## Features
 
-- Applies **morphological transformations** (dilation, erosion, blurring)
-- Simulates **ink bleeding**
-- Adds **random shadows and smudges**
-- Randomly perturbs **baseline coordinates** in ALTO XML
-- Maintains 1:1 correspondence between augmented images and updated XML
-- Applies **Sauvola binarization** to reduce noice
-- Generates different script variations using **Bézier curves**
-- Reconstructs pages from synthetic data
+The workflow includes:
 
----
+-   **Sauvola binarization** for document preprocessing
+-   Morphological transformations including **dilation, erosion, and
+    blurring**
+-   Simulation of **ink bleeding**
+-   Random **shadows and smudges**
+-   Controlled perturbation of **baseline coordinates** in ALTO XML
+-   Preservation of the correspondence between augmented images and XML
+    annotations
+-   Generation of script variations using **Bézier curves**
+-   Reconstruction of manuscript pages from synthetic line-level data
+-   Generation of multiple augmented versions of each source document
+
+------------------------------------------------------------------------
+
+## Workflow
+
+The augmentation pipeline processes historical manuscript images
+together with their ALTO XML annotations.
+
+The general workflow is:
+
+1.  Load manuscript images and corresponding ALTO XML files.
+2.  Extract and preprocess text lines.
+3.  Apply Sauvola binarization and image cleaning.
+4.  Generate line-level graphical variations.
+5.  Apply additional visual augmentation.
+6.  Reconstruct synthetic manuscript pages.
+7.  Update the corresponding ALTO XML information.
+8.  Export paired synthetic images and annotations for HTR training.
+
+This makes it possible to increase the size and graphical diversity of
+an HTR training corpus while retaining the structural information
+required by the recognition pipeline.
+
+------------------------------------------------------------------------
 
 ## How to Use
 
-1. **Prepare your input data**:
-   - Place `.png` or `.jpg` images and their corresponding `.xml` ALTO files in the `data` folder.
-   - Each image must have a corresponding `.xml` file with the **same filename (excluding extension)**.
+### 1. Prepare the input data
 
+Place the manuscript images (`.png` or `.jpg`) and their corresponding
+ALTO XML (`.xml`) files in the input directory.
 
-2. **Run the script**:
-   ```bash
-   python data_generation.py
-    ```
-    Check your output:
-   
-     Augmented images and XMLs will be saved in the `data/rebuilt_pages` folder.
-   
-     For each input image, 4 augmented versions will be created by default.
+Each image must have a corresponding XML file with the same base
+filename.
 
+Example:
 
-# Configuration
-
-You can customize the following parameters under `config.json`:
-
-| parameter | default value              | description                                  |
-|-----------|----------------------------|----------------------------------------------|
-| src       | data/src                   | iput folder                                  |
-| binarized_lines       | data/binarized_lines       | output folder for binarized lines            |
-| binarized_lines_clean       | data/binarized_lines_clean | output folder for clean binarized lines      |
-| augmented_lines       | data/augmented_lines       | output folder for generated lines            |
-| rebuilt_pages       | data/rebuilt_pages         | output folder for rebuilt pages              |
-| augmented_pages       | data/augmented_pages       | output folder for augmented pages            |
-| baseline_noise       | 4                          | baseline noise of visual augmentation        |
-| crop_margin_v       | 5                          | Crop margin vertical value                   |
-| crop_margin_h       | 15                         | Crop margin horizontal value                 |
-| sauvola_window_size       | 35                         | Window size for Sauvola binarization         |
-| sauvola_k       | 0.3                        | Window size for Sauvola's positive parameter |
-| cleaner_min_area       | 15                         | Min area to clean                            |
-| augmentation_k1       | 0.1                        | Bézier k1 control field                      |
-| augmentation_k2       | 0.2                        | Bézier k2 control field                      |
-| augmentation_stroke_radius       | 4                          | Augmentation stroke radius                   |
-
-
-
-# Requirements
-
-Create a virtual environment and Install dependencies using conda:
-
-`conda env create -f augmentation_htr.yaml`
-
-# Notes
-
-- Augmentation is non-destructive: originals are copied as-is to the output folder.
-- Random operations are used for realism — each run will produce slightly different outputs.
-- Bézier augmentation's core is a fork from [script-level_aug_ICFHR2022](https://github.com/IMU-MachineLearningSXD/script-level_aug_ICFHR2022), which we adapted to work with historical documents.
-
-# How to cite
-
-You can cite it using the [CITATION.cff](cm.univ-tours.fr/cesr/prima/data_augmentation/-/blob/main/CITATION.cff) file or cite as following:
-
-```bash
-Crespi, Serena Carlamaria, and Carlos Emiliano González-Gallardo.
-PRIMA HTR Augmentation Code. Version 1.0, 25 Sept. 2025,
-ERC PRIMA (hosted at CESR, Université de Tours), https://gitlab.com/cesr/prima/data_augmentation.
+``` text
+page_001.png
+page_001.xml
+page_002.png
+page_002.xml
 ```
 
+### 2. Create the environment
 
-# License & Attribution
-This script is provided freely for research and experimental use.
-It is part of the ongoing experiments and research conducted within the ERC PRIMA project (Grant No. 101142242), 
-by Serena Carlamaria Crespi and Carlos Emiliano González-Gallardo.
+Create the Conda environment using:
+
+``` bash
+conda env create -f augmentation_htr.yaml
+```
+
+Then activate the environment according to the name defined in the YAML
+file.
+
+### 3. Run the workflow
+
+``` bash
+python data_generation.py
+```
+
+Generated files are written to the directories specified in
+`config.json`.
+
+By default, multiple augmented versions can be generated for each input
+image.
+
+------------------------------------------------------------------------
+
+## Configuration
+
+The main parameters can be configured in `config.json`.
+
+  -----------------------------------------------------------------------------------
+  Parameter                      Default value                  Description
+  ------------------------------ ------------------------------ ---------------------
+  `src`                          `data/src`                     Input directory
+
+  `binarized_lines`              `data/binarized_lines`         Output directory for
+                                                                binarized text lines
+
+  `binarized_lines_clean`        `data/binarized_lines_clean`   Output directory for
+                                                                cleaned binarized
+                                                                lines
+
+  `augmented_lines`              `data/augmented_lines`         Output directory for
+                                                                generated line
+                                                                variations
+
+  `rebuilt_pages`                `data/rebuilt_pages`           Output directory for
+                                                                reconstructed pages
+
+  `augmented_pages`              `data/augmented_pages`         Output directory for
+                                                                augmented pages
+
+  `baseline_noise`               `4`                            Baseline perturbation
+                                                                used during
+                                                                augmentation
+
+  `crop_margin_v`                `5`                            Vertical crop margin
+
+  `crop_margin_h`                `15`                           Horizontal crop
+                                                                margin
+
+  `sauvola_window_size`          `35`                           Window size for
+                                                                Sauvola binarization
+
+  `sauvola_k`                    `0.3`                          Sauvola parameter *k*
+
+  `cleaner_min_area`             `15`                           Minimum
+                                                                connected-component
+                                                                area retained during
+                                                                cleaning
+
+  `augmentation_k1`              `0.1`                          Bézier transformation
+                                                                parameter *k1*
+
+  `augmentation_k2`              `0.2`                          Bézier transformation
+                                                                parameter *k2*
+
+  `augmentation_stroke_radius`   `4`                            Stroke radius used
+                                                                during graphical
+                                                                augmentation
+  -----------------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Requirements
+
+Dependencies are defined in `augmentation_htr.yaml`.
+
+Install them with:
+
+``` bash
+conda env create -f augmentation_htr.yaml
+```
+
+------------------------------------------------------------------------
+
+## Notes
+
+-   The augmentation workflow is non-destructive: the original source
+    data are not modified.
+-   Several transformations include stochastic operations; consequently,
+    different runs may produce different synthetic outputs.
+-   Parameters can be adjusted in `config.json` to adapt the workflow to
+    different manuscript corpora.
+-   The workflow was developed and tested in the context of HTR
+    experiments on premodern Italian manuscript material.
+
+------------------------------------------------------------------------
+
+## Acknowledgements and Third-Party Code
+
+The Bézier-based augmentation component builds upon
+[`script-level_aug_ICFHR2022`](https://github.com/IMU-MachineLearningSXD/script-level_aug_ICFHR2022),
+which was adapted for use with historical manuscript material.
+
+Please refer to the original project for information concerning its
+implementation, licensing, and attribution requirements.
+
+------------------------------------------------------------------------
+
+## How to Cite
+
+If you use this software in your research, please cite:
+
+> Crespi, Serena Carlamaria, and Carlos-Emiliano González-Gallardo.\
+> *PRIMA HTR Augmentation Code*. Version 1.0, 2025.\
+> ERC PRIMA, Centre d'Études Supérieures de la Renaissance, Université
+> de Tours.
+
+Citation metadata are also available in the [CITATION.cff](CITATION.cff)
+file.
+
+------------------------------------------------------------------------
+
+## Authors
+
+**Serena Carlamaria Crespi**\
+Centre d'Études Supérieures de la Renaissance · Université de Tours\
+ORCID: https://orcid.org/0000-0001-6747-3257
+
+**Carlos-Emiliano González-Gallardo**\
+ERC PRIMA · Centre d'Études Supérieures de la Renaissance
+
+------------------------------------------------------------------------
+
+## Project
+
+This software was developed within:
+
+**ERC PRIMA --- Manuscripts in the Age of Print (1575--1800)**\
+Grant Agreement No. **101142242**
+
+Centre d'Études Supérieures de la Renaissance\
+Université de Tours
+
+------------------------------------------------------------------------
+
+## License
+
+This repository contains research software developed within the ERC
+PRIMA project.
+
+See the `LICENSE` file for the terms governing reuse and distribution.
