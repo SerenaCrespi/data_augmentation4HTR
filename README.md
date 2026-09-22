@@ -218,7 +218,9 @@ Centre d'Études Supérieures de la Renaissance · Université de Tours\
 ORCID: https://orcid.org/0000-0001-6747-3257
 
 **Carlos-Emiliano González-Gallardo**\
-ERC PRIMA · Centre d'Études Supérieures de la Renaissance
+LIFAT — Laboratoire d'Informatique Fondamentale et Appliquée de Tours · Université de Tours\
+ERC PRIMA External Collaborator · Centre d'Études Supérieures de la Renaissance\
+ORCID: https://orcid.org/0000-0002-0787-2990
 
 ------------------------------------------------------------------------
 
